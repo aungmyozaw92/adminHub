@@ -16,6 +16,27 @@ class User < ApplicationRecord
   validate :avatar_content_type
   validate :avatar_size
 
+  # Permission methods
+  def has_role?(role_name)
+    roles.exists?(name: role_name)
+  end
+
+  def can?(permission_name)
+    roles.joins(:permissions).exists?(permissions: { name: permission_name })
+  end
+
+  def permissions
+    roles.joins(:permissions).pluck('permissions.name').uniq
+  end
+
+  def admin?
+    has_role?('admin')
+  end
+
+  def manager?
+    has_role?('manager')
+  end
+
   private
 
   def avatar_content_type

@@ -1,0 +1,105 @@
+<%= form_with model: [:admin, @role], local: true, class: "space-y-6" do |form| %>
+  <% if @role.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(@role.errors.count, "error") %> prohibited this role from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <% @role.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Role Information -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Role Information</h3>
+    
+    <div class="grid grid-cols-1 gap-6">
+      <!-- Role Name -->
+      <div>
+        <%= form.label :name, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_field :name, 
+            class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @role.errors[:name].any?}",
+            placeholder: "Enter role name (e.g., editor, moderator)" %>
+        <% if @role.errors[:name].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @role.errors[:name].first %></p>
+        <% end %>
+      </div>
+
+      <!-- Role Description -->
+      <div>
+        <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_area :description, 
+            rows: 3,
+            class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 #{'border-red-300 focus:ring-red-500 focus:border-red-500' if @role.errors[:description].any?}",
+            placeholder: "Describe what this role can do..." %>
+        <% if @role.errors[:description].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @role.errors[:description].first %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Permissions</h3>
+    <p class="text-sm text-gray-600 mb-6">Select the permissions that this role should have:</p>
+    
+    <div class="space-y-4">
+      <% @permissions.group_by { |p| p.name.split(':').first }.each do |resource, permissions| %>
+        <div class="border border-gray-200 rounded-lg p-4">
+          <h4 class="text-sm font-semibold text-gray-800 mb-3 capitalize">
+            <%= resource.humanize %> Permissions
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <% permissions.each do |permission| %>
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <%= form.check_box :permission_ids, 
+                      { 
+                        multiple: true, 
+                        checked: @role.permissions.include?(permission),
+                        class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      }, 
+                      permission.id, 
+                      nil %>
+                </div>
+                <div class="ml-3 text-sm">
+                  <%= form.label "permission_ids_#{permission.id}", 
+                      class: "font-medium text-gray-700 cursor-pointer" do %>
+                    <%= permission.name.split(':').last.humanize %>
+                  <% end %>
+                  <% if permission.description.present? %>
+                    <p class="text-gray-500 text-xs mt-1"><%= permission.description %></p>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+    <%= link_to "Cancel", admin_roles_path, 
+        class: "px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" %>
+    
+    <%= form.submit @role.persisted? ? "Update Role" : "Create Role",
+        class: "px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" %>
+  </div>
+<% end %>

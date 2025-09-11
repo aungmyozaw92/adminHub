@@ -4,6 +4,50 @@
 
 puts "🌱 Starting database seeding..."
 
+# Create Permissions
+puts "🔐 Creating permissions..."
+permissions_data = [
+  # Dashboard permissions
+  { name: "dashboard:read", description: "View dashboard" },
+  
+  # User permissions
+  { name: "users:read", description: "View users" },
+  { name: "users:create", description: "Create new users" },
+  { name: "users:update", description: "Update user information" },
+  { name: "users:delete", description: "Delete users" },
+  
+  # Role permissions
+  { name: "roles:read", description: "View roles" },
+  { name: "roles:create", description: "Create new roles" },
+  { name: "roles:update", description: "Update role information" },
+  { name: "roles:delete", description: "Delete roles" },
+  
+  # Permission permissions
+  { name: "permissions:read", description: "View permissions" },
+  { name: "permissions:create", description: "Create new permissions" },
+  { name: "permissions:update", description: "Update permission information" },
+  { name: "permissions:delete", description: "Delete permissions" },
+  
+  # Category permissions
+  { name: "categories:read", description: "View categories" },
+  { name: "categories:create", description: "Create new categories" },
+  { name: "categories:update", description: "Update category information" },
+  { name: "categories:delete", description: "Delete categories" },
+  
+  # Profile permissions
+  { name: "profile:read", description: "View own profile" },
+  { name: "profile:update", description: "Update own profile" }
+]
+
+permissions = {}
+permissions_data.each do |permission_attrs|
+  permission = Permission.find_or_create_by!(name: permission_attrs[:name]) do |p|
+    p.description = permission_attrs[:description]
+  end
+  permissions[permission_attrs[:name].to_sym] = permission
+  puts "  ✅ Created permission: #{permission.name}"
+end
+
 # Create Roles
 puts "📋 Creating roles..."
 roles_data = [
@@ -21,6 +65,47 @@ roles_data.each do |role_attrs|
   roles[role_attrs[:name].to_sym] = role
   puts "  ✅ Created role: #{role.name}"
 end
+
+# Assign permissions to roles
+puts "🔗 Assigning permissions to roles..."
+
+# Admin gets all permissions
+admin_role = roles[:admin]
+admin_role.permissions = Permission.all
+puts "  ✅ Assigned all permissions to admin role"
+
+# Manager gets most permissions except role and permission management
+manager_permissions = [
+  :"dashboard:read", :"users:read", :"users:create", :"users:update", :"users:delete",
+  :"roles:read", :"permissions:read", :"categories:read", :"categories:create", :"categories:update",
+  :"profile:read", :"profile:update"
+]
+manager_role = roles[:manager]
+manager_permissions.each do |perm_key|
+  permission = permissions[perm_key]
+  manager_role.add_permission(permission.name) if permission
+end
+puts "  ✅ Assigned manager permissions"
+
+# User gets basic permissions
+user_permissions = [:"profile:read", :"profile:update"]
+user_role = roles[:user]
+user_permissions.each do |perm_key|
+  permission = permissions[perm_key]
+  user_role.add_permission(permission.name) if permission
+end
+puts "  ✅ Assigned user permissions"
+
+# Moderator gets user management permissions
+moderator_permissions = [
+  :"dashboard:read", :"users:read", :"users:update", :"profile:read", :"profile:update"
+]
+moderator_role = roles[:moderator]
+moderator_permissions.each do |perm_key|
+  permission = permissions[perm_key]
+  moderator_role.add_permission(permission.name) if permission
+end
+puts "  ✅ Assigned moderator permissions"
 
 # Create Users
 puts "👥 Creating users..."

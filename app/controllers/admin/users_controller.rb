@@ -14,7 +14,7 @@ class Admin::UsersController < Admin::BaseController
     end
     
     # Apply pagination and ordering
-    @users = @users.order(:name).page(params[:page]).per(10)
+    @users = @users.order(:created_at).page(params[:page]).per(10)
   end
 
   def show

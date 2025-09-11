@@ -53,4 +53,21 @@ module ApplicationHelper
       end
     end
   end
+
+  # Permission helper methods
+  def can?(permission)
+    current_user&.can?(permission)
+  end
+
+  def has_role?(role_name)
+    current_user&.has_role?(role_name)
+  end
+
+  def admin?
+    current_user&.admin?
+  end
+
+  def manager?
+    current_user&.manager?
+  end
 end
