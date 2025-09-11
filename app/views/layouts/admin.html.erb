@@ -20,5 +20,16 @@
         </main>
       </div>
     </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2" style="pointer-events: none;">
+      <!-- Flash Messages as Toasts -->
+      <% if notice %>
+        <%= render "shared/toast", type: "success", message: notice, duration: 5000 %>
+      <% end %>
+      <% if alert %>
+        <%= render "shared/toast", type: "error", message: alert, duration: 5000 %>
+      <% end %>
+    </div>
   </body>
 </html>

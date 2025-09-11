@@ -7,7 +7,9 @@ import { application } from "./application"
 import HelloController from "./hello_controller"
 import SidebarController from "./sidebar_controller"
 import DropdownController from "./dropdown_controller"
+import ToastController from "./toast_controller"
 
 application.register("hello", HelloController)
 application.register("sidebar", SidebarController)
 application.register("dropdown", DropdownController)
+application.register("toast", ToastController)

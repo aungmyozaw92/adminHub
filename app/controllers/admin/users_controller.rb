@@ -2,7 +2,19 @@ class Admin::UsersController < Admin::BaseController
   before_action :set_user, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @users = User.includes(:roles).order(:name)
+    @search = params[:search]
+    @users = User.includes(:roles)
+    
+    # Apply search filter if search parameter is present
+    if @search.present?
+      @users = @users.where(
+        "name LIKE ? OR email LIKE ? OR phone LIKE ?", 
+        "%#{@search}%", "%#{@search}%", "%#{@search}%"
+      )
+    end
+    
+    # Apply pagination and ordering
+    @users = @users.order(:name).page(params[:page]).per(10)
   end
 
   def show
@@ -23,7 +35,14 @@ class Admin::UsersController < Admin::BaseController
         selected_roles = Role.where(id: params[:user][:role_ids].reject(&:blank?))
         @user.roles = selected_roles
       end
-      redirect_to admin_user_path(@user), notice: "User was successfully created."
+      
+      respond_to do |format|
+        format.html { redirect_to admin_users_path, notice: "User was successfully created." }
+        format.turbo_stream { 
+          flash[:notice] = "User was successfully created."
+          redirect_to admin_users_path
+        }
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -44,15 +63,32 @@ class Admin::UsersController < Admin::BaseController
       else
         @user.roles.clear
       end
-      redirect_to admin_user_path(@user), notice: "User was successfully updated."
+      
+      respond_to do |format|
+        format.html { redirect_to admin_users_path, notice: "User was successfully updated." }
+        format.turbo_stream { 
+          flash[:notice] = "User was successfully updated."
+          redirect_to admin_users_path
+        }
+      end
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
+    user_name = @user.name
     @user.destroy
-    redirect_to admin_users_path, notice: "User was successfully deleted."
+    
+    respond_to do |format|
+      format.html { redirect_to admin_users_path, notice: "#{user_name} was successfully deleted." }
+      format.turbo_stream { 
+        render turbo_stream: [
+          turbo_stream.append("toast-container", partial: "shared/toast", locals: { type: "success", message: "#{user_name} was successfully deleted.", duration: 5000 }),
+          turbo_stream.remove("user-row-#{@user.id}")
+        ]
+      }
+    end
   end
 
   private

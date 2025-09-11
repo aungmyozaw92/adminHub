@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   has_secure_password   # enables password_digest authentication
 
+  # Pagination
+  paginates_per 10
+
   # Associations
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
@@ -9,7 +12,6 @@ class User < ApplicationRecord
   # Validations
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true
-  validates :phone, uniqueness: true, allow_nil: true
   validates :password, length: { minimum: 6 }, allow_blank: true
   validate :avatar_content_type
   validate :avatar_size
