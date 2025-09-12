@@ -6,7 +6,7 @@ class Admin::BaseController < ApplicationController
   private
 
   def require_admin_login
-    redirect_to new_admin_session_path unless current_user
+    redirect_to admin_login_path unless current_user
   end
 
   def check_permission
@@ -55,7 +55,7 @@ class Admin::BaseController < ApplicationController
     unless current_user&.can?(permission_name)
       # If user doesn't have permission for dashboard, redirect to login instead of creating a loop
       if permission_name == 'dashboard:read'
-        redirect_to new_admin_session_path, alert: 'Access denied. You do not have permission to access the dashboard.'
+        redirect_to admin_login_path, alert: 'Access denied. You do not have permission to access the dashboard.'
       else
         redirect_to admin_dashboard_path, alert: 'Access denied. You do not have permission to perform this action.'
       end

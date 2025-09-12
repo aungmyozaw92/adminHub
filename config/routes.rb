@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   # Admin dashboard routes (protected)
   namespace :admin do
     get "dashboard", to: "dashboard#index"
+    get "test_modal", to: "dashboard#test_modal"
     resources :users
     resources :roles
     resources :permissions
@@ -14,6 +15,9 @@ Rails.application.routes.draw do
     # resources :projects
   end
 
+  # Test route
+  get "test_modal", to: "test#modal"
+  
   # Redirect root to admin login
   root "admin/sessions#new"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
